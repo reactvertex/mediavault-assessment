@@ -1,4 +1,4 @@
-import type { AssetStatus } from './types';
+import type { AssetKind, AssetStatus } from './types';
 
 const UNITS = ['B', 'KB', 'MB', 'GB'];
 
@@ -19,12 +19,16 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 });
 
 export function formatDate(iso: string): string {
-  return dateFormatter.format(new Date(iso));
+  try {
+    return dateFormatter.format(new Date(iso));
+  } catch {
+    return iso;
+  }
 }
 
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
+  const s = Math.floor(seconds % 60);
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
@@ -36,5 +40,22 @@ const STATUS_LABELS: Record<AssetStatus, string> = {
 };
 
 export function statusLabel(status: AssetStatus): string {
-  return STATUS_LABELS[status];
+  return STATUS_LABELS[status] || status;
 }
+
+/**
+ * Unique symbol glyphs for each status to ensure distinction without
+ * relying solely on color (colorblind friendly).
+ */
+export const STATUS_ICONS: Record<AssetStatus, string> = {
+  draft: '○', // outline circle
+  in_review: '◐', // half circle
+  approved: '✓', // checkmark
+  archived: '⊘', // circle slash
+};
+
+export const KIND_ICONS: Record<AssetKind, string> = {
+  image: '🖼️',
+  video: '🎬',
+  document: '📄',
+};
